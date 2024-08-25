@@ -2,7 +2,7 @@
 
 
 ***
-## *!This plugin has been modified by the FullBuff dev team to be used on our hosted servers!*
+## *!This plugin has been modified by the [FullBuff](https://www.fullbuff.gg/) dev team to be used on our hosted servers!*
 
 
 
