@@ -1,4 +1,13 @@
 # TF2_Server_UpTime_Restarter
+
+
+***
+## *!This plugin has been modified by the FullBuff dev team to be used on our hosted servers!*
+
+
+
+
+
 This plugin will automatically restart your server after a set period of no activity.
 
 If a server runs for long enough, then a detrimental jitter effect can take place. I theorize this is due to floating point errors and is a rather nasty bug. It is really quite bad for server reputation when new players join a low (or empty) population of players in a server, only to encounter this.
