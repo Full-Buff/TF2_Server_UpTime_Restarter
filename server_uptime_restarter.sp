@@ -6,12 +6,13 @@ new Handle:hMaxPlayers;
 new Handle:hWarn_ShowChat;
 new bool:InRestartCountdown;
 new iIdleTime;
+new Float:gLastWarningTime = 0.0;  // Store the time of the last warning
 
 public const Plugin:myinfo = {
 	name = "Server UpTime Restarter",
 	author = "CoolJosh3k",
 	description = "Restarts a server after a specified uptime. Respects player counts.",
-	version = "1.0.1",
+	version = "1.0.2",
 }
 
 public OnPluginStart()
@@ -65,8 +66,19 @@ public Action:CheckTime(Handle:timer)
 	}
 	if (GetEngineTime() >= GetConVarInt(hUpTime_Max))	//It has been far too long. A server restart must happen.
 	{
-		BeginServerRestart();
-		return;
+		// Check if 30 minutes (1800 seconds) have passed since the last warning
+        if ((GetEngineTime() - gLastWarningTime) >= 1800.0)
+        {
+            // Send the warning message
+            if (GetConVarBool(hWarn_ShowChat))
+            {
+                PrintToChatAll("\\x03SUR: \\x04Warning! The server has been online for a long time. It is recommended to reboot manually to maintain optimal performance.");
+            }
+            
+            // Update the last warning time to the current engine time
+            gLastWarningTime = GetEngineTime();
+			return;
+        }
 	}
 	if (GetEngineTime() >= GetConVarInt(hUpTime_Min))
 	{
