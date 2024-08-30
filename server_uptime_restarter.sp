@@ -19,8 +19,8 @@ public OnPluginStart()
 {
 	AutoExecConfig();
 	hEnable = CreateConVar("SUR_Enable", "1", "Use this if you wish to stop plugin functions temporarily.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	hUpTime_Min = CreateConVar("SUR_UpTime_Min", "3600", "Minimum time in seconds before restart attempt.", FCVAR_NOTIFY, true, 60.0);
-	hUpTime_Max = CreateConVar("SUR_UpTime_Max", "86400", "Time in seconds before server restart is forced, regardless of player count.", FCVAR_NOTIFY, true, 60.0);
+	hUpTime_Min = CreateConVar("SUR_UpTime_Min", "3600", "Minimum time in seconds before restart attempt.", FCVAR_NOTIFY, true, 300.0);
+	hUpTime_Max = CreateConVar("SUR_UpTime_Max", "86400", "Time in seconds before an alert is sent, recommending a manual reboot is performed", FCVAR_NOTIFY, true, 300.0);
 	hMaxPlayers = CreateConVar("SUR_MinPlayers", "1", "Atleast this many players will cause the restart to be delayed. Spectators are not counted.", FCVAR_NOTIFY, true, 1.0);
 	hWarn_ShowChat = CreateConVar("SUR_Warn_ShowChat", "1", "Display restart warning message as a chat message.", FCVAR_NONE, true, 0.0, true, 1.0);
 	CreateTimer(1.0, CheckTime, _, TIMER_REPEAT);
@@ -133,6 +133,16 @@ public OnMapEnd()
 
 
 public BeginServerRestart()
+{
+	InRestartCountdown = true;
+	if (GetConVarBool(hWarn_ShowChat))
+	{
+		PrintToChatAll("\x03SUR: \x04Server will perform scheduled restart in 5 minutes.");
+	}
+	CreateTimer(60.0, ServerRestartSixty);
+}
+
+public Action:ServerRestartSixty(Handle:timer)
 {
 	InRestartCountdown = true;
 	if (GetConVarBool(hWarn_ShowChat))
