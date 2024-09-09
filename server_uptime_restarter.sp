@@ -1,21 +1,32 @@
 #include <sourcemod>
+#include <updater>
 
-new Handle:hEnable;
-new Handle:hUpTime_Min, Handle:hUpTime_Max;
-new Handle:hMaxPlayers;
-new Handle:hWarn_ShowChat;
-new bool:InRestartCountdown;
-new iIdleTime;
-new Float:gLastWarningTime = 0.0;  // Store the time of the last warning
+#pragma semicolon 1
+#pragma newdecls required
 
-public const Plugin:myinfo = {
-	name = "Server UpTime Restarter",
-	author = "CoolJosh3k",
-	description = "Restarts a server after a specified uptime. Respects player counts.",
-	version = "1.0.2",
+Handle hEnable;
+Handle hUpTime_Min;
+Handle hUpTime_Max;
+Handle hMaxPlayers;
+Handle hWarn_ShowChat;
+bool InRestartCountdown;
+float iIdleTime = 0.0;
+float gLastWarningTime = 0.0;  // Store the time of the last warning
+
+#define PLUGIN_NAME        "Server UpTime Restarter"
+#define PLUGIN_VERSION     "1.0.1"  // Update with your current version
+#define UPDATE_URL         "https://mirror.fullbuff.gg/tf2/addons/FullBuff/sur/update_manifest.txt"
+
+
+public Plugin myinfo = {
+	name = PLUGIN_NAME,
+	author = "Fuko, CoolJosh3k",
+	description = "Restarts a server after a specified uptime. Will alert if players are connected and max uptime has been reached.",
+	version = PLUGIN_VERSION,
+	url = "https://github.com/Full-Buff/TF2_Server_UpTime_Restarter",
 }
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	AutoExecConfig();
 	hEnable = CreateConVar("SUR_Enable", "1", "Use this if you wish to stop plugin functions temporarily.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
@@ -24,9 +35,24 @@ public OnPluginStart()
 	hMaxPlayers = CreateConVar("SUR_MinPlayers", "1", "Atleast this many players will cause the restart to be delayed. Spectators are not counted.", FCVAR_NOTIFY, true, 1.0);
 	hWarn_ShowChat = CreateConVar("SUR_Warn_ShowChat", "1", "Display restart warning message as a chat message.", FCVAR_NONE, true, 0.0, true, 1.0);
 	CreateTimer(1.0, CheckTime, _, TIMER_REPEAT);
+
+	if (LibraryExists("updater") )
+	{
+		Updater_AddPlugin(UPDATE_URL);
+	}
+	
+	LogMessage("[SM] ", PLUGIN_NAME, " version ", PLUGIN_VERSION, " loaded.");
 }
 
-stock bool:IsValidPlayer(client)
+public void OnLibraryAdded(const char[] name)
+{
+    if (StrEqual(name, "updater"))
+    {
+        Updater_AddPlugin(UPDATE_URL);
+    }
+}
+
+bool IsValidPlayer(int client)
 {
 	if ((client < 1) || (client > MaxClients))
 	{
@@ -54,7 +80,7 @@ stock bool:IsValidPlayer(client)
 	return true;
 }
 
-public Action:CheckTime(Handle:timer)
+public Action CheckTime(Handle timer)
 {
 	if (GetConVarBool(hEnable) == false)
 	{
@@ -77,7 +103,7 @@ public Action:CheckTime(Handle:timer)
             
             // Update the last warning time to the current engine time
             gLastWarningTime = GetEngineTime();
-			return;
+            return;
         }
 	}
 	if (GetEngineTime() >= GetConVarInt(hUpTime_Min))
@@ -94,8 +120,8 @@ public Action:CheckTime(Handle:timer)
 		{
 			iIdleTime = 0;
 		}
-		new TotalActivePlayers;
-		for (new client = 1; client <= MaxClients; client++)
+		int TotalActivePlayers = 0;
+		for (int client = 1; client <= MaxClients; client++)
 		{
 			if (IsValidPlayer(client))
 			{
@@ -115,7 +141,7 @@ public Action:CheckTime(Handle:timer)
 	return;
 }
 
-public OnMapEnd()
+public void OnMapEnd()
 {
 	if (GetConVarBool(hEnable) == false)
 	{
@@ -123,7 +149,7 @@ public OnMapEnd()
 	}
 	if (InRestartCountdown)
 	{
-		LogMessage("Server restart using \"Server UpTime Restarter\" on map end...");
+		LogMessage("Server restart using \"", PLUGIN_NAME, "\" on map end...");
 		ServerCommand("_restart");
 	}
 }
@@ -132,7 +158,7 @@ public OnMapEnd()
 //- Chain of timers for countdown -//
 
 
-public BeginServerRestart()
+public Action BeginServerRestart()
 {
 	InRestartCountdown = true;
 	if (GetConVarBool(hWarn_ShowChat))
@@ -142,7 +168,7 @@ public BeginServerRestart()
 	CreateTimer(60.0, ServerRestartSixty);
 }
 
-public Action:ServerRestartSixty(Handle:timer)
+public Action ServerRestartSixty(Handle timer)
 {
 	InRestartCountdown = true;
 	if (GetConVarBool(hWarn_ShowChat))
@@ -152,7 +178,7 @@ public Action:ServerRestartSixty(Handle:timer)
 	CreateTimer(30.0, ServerRestartThirty);
 }
 
-public Action:ServerRestartThirty(Handle:timer)
+public Action ServerRestartThirty(Handle timer)
 {
 	if (GetConVarBool(hEnable))
 	{
@@ -168,7 +194,7 @@ public Action:ServerRestartThirty(Handle:timer)
 	}
 }
 
-public Action:ServerRestartTen(Handle:timer)
+public Action ServerRestartTen(Handle timer)
 {
 	if (GetConVarBool(hEnable))
 	{
@@ -184,7 +210,7 @@ public Action:ServerRestartTen(Handle:timer)
 	}
 }
 
-public Action:ServerRestartFive(Handle:timer)
+public Action ServerRestartFive(Handle timer)
 {
 	if (GetConVarBool(hEnable))
 	{
@@ -200,7 +226,7 @@ public Action:ServerRestartFive(Handle:timer)
 	}
 }
 
-public Action:ServerRestartOne(Handle:timer)
+public Action ServerRestartOne(Handle timer)
 {
 	if (GetConVarBool(hEnable))
 	{
@@ -216,11 +242,11 @@ public Action:ServerRestartOne(Handle:timer)
 	}
 }
 
-public Action:ServerRestartZero(Handle:timer)
+public Action ServerRestartZero(Handle timer)
 {
 	if (GetConVarBool(hEnable))
 	{
-		LogMessage("Server restart using \"Server UpTime Restarter\"...");
+		LogMessage("Server restart using \"", PLUGIN_NAME, "\"...");
 		ServerCommand("_restart");
 	}
 	else

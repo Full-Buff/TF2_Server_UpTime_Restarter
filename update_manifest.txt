@@ -1,0 +1,19 @@
+"Updater"
+{
+	"Information"
+	{
+		"Version"
+		{
+			"Latest"	"1.0.1"
+		}
+		
+		"Notes"	"FullBuff Test"
+	}
+	
+	"Files"
+	{
+		"Plugin"	"Path_SM/plugins/server_uptime_restarter.smx"
+		
+		"Source"	"Path_SM/scripting/server_uptime_restarter.sp"
+	}
+}
