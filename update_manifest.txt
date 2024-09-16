@@ -4,10 +4,11 @@
 	{
 		"Version"
 		{
-			"Latest"	"1.0.1"
+			"Latest"	"1.0.2"
 		}
 		
-		"Notes"	"FullBuff Test"
+		"Notes"	"Updater support now functioning"
+		"Notes"	"Will also create a log file at /tf/reboot_log.txt"
 	}
 	
 	"Files"

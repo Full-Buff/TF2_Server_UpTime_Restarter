@@ -14,7 +14,7 @@ float iIdleTime = 0.0;
 float gLastWarningTime = 0.0;  // Store the time of the last warning
 
 #define PLUGIN_NAME        "Server UpTime Restarter"
-#define PLUGIN_VERSION     "1.0.1"  // Update with your current version
+#define PLUGIN_VERSION     "1.0.2"  // Update with your current version
 #define UPDATE_URL         "https://mirror.fullbuff.gg/tf2/addons/FullBuff/sur/update_manifest.txt"
 
 
@@ -52,7 +52,7 @@ public void OnLibraryAdded(const char[] name)
     }
 }
 
-bool IsValidPlayer(int client)
+public bool IsValidPlayer(int client)
 {
 	if ((client < 1) || (client > MaxClients))
 	{
@@ -246,15 +246,18 @@ public Action ServerRestartZero(Handle timer)
 {
 	if (GetConVarBool(hEnable))
 	{
-		LogMessage("Server restart using \"", PLUGIN_NAME, "\"...");
-		ServerCommand("_restart");
+        // Get the current time and format it
+        char currentTime[32];  // Ensure enough space for the time format
+        FormatTime(currentTime, sizeof(currentTime), "%Y-%m-%d %H:%M:%S", GetTime());
+
+        // Overwrite log file with time and date
+        LogToFile("reboot_log.txt", "Server restarted on: %s", currentTime);
+
+        LogMessage("Server restart using \"", PLUGIN_NAME, "\"...");
+        ServerCommand("_restart");
 	}
 	else
 	{
 		InRestartCountdown = false;
 	}
 }
-
-
-
-
